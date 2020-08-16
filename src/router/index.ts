@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import HelloWorld from '../components/HelloWorld.vue'
+import Autoplay from '../views/Autoplay.vue';
 
 Vue.use(VueRouter)
 
@@ -9,6 +10,11 @@ Vue.use(VueRouter)
     path: '/',
     name: 'Home',
     component: HelloWorld
+  },
+  {
+    path: '/play',
+    name: 'play',
+    component: Autoplay
   }
 ]
 
