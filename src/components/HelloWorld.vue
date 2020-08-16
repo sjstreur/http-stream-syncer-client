@@ -34,6 +34,8 @@ export default class HelloWorld extends Vue {
 
 // https://www.w3schools.com/tags/ref_av_dom.asp
   async mounted() {
+    
+
     // document.addEventListener('beforeunload', () => this.$socket.emit('disconnected'));
     const data = await (this as any).axios.get(`http://${location.hostname}:3000/streaming-info`);
     this.isStreamLeader = data.data.streamLeader;
@@ -43,8 +45,11 @@ export default class HelloWorld extends Vue {
     (this as any).sockets.subscribe('currentUserChange', (data: any) => {   
       this.currentUsers = data;
     });
+
     (this as any).sockets.subscribe('startPlaying', (data: any) => {
-      (this as any).$router.push({ name: 'play' });
+      console.log('lol');
+      
+      (this as any).$router.push({ name: 'play' }).catch((err: any) => console.log(!err ? '' : ''));
       // this._refreshPlayer();
       // setTimeout(() => {
       //   this.audioElement.load();
