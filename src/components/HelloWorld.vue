@@ -6,6 +6,7 @@
       <li>streamUrl = {{streamUrl}}</li>
     </ul>
     <button @click="onPressPlay">play for everyone</button>
+    <button>unblock</button>
     <div v-if="streamUrl && refresh">
       <audio @loadedmetadata="loadedMetaData = true; " ref="audio" preload controls>
         <source :src="streamUrl"  type="audio/mpeg">
@@ -34,7 +35,7 @@ export default class HelloWorld extends Vue {
 
 // https://www.w3schools.com/tags/ref_av_dom.asp
   async mounted() {
-    
+
 
     // document.addEventListener('beforeunload', () => this.$socket.emit('disconnected'));
     const data = await (this as any).axios.get(`http://${location.hostname}:3000/streaming-info`);
@@ -44,11 +45,10 @@ export default class HelloWorld extends Vue {
 
     (this as any).sockets.subscribe('currentUserChange', (data: any) => {   
       this.currentUsers = data;
+      localStorage.setItem('currentUsers', data)
     });
 
     (this as any).sockets.subscribe('startPlaying', (data: any) => {
-      console.log('lol');
-      
       (this as any).$router.push({ name: 'play' }).catch((err: any) => console.log(!err ? '' : ''));
       // this._refreshPlayer();
       // setTimeout(() => {

@@ -5,9 +5,10 @@ import store from './store'
 import VueAxios from 'vue-axios';
 import axios from 'axios';
 import VueSocketIO from 'vue-socket.io';
+import './registerServiceWorker'
 
 Vue.config.productionTip = false
- 
+
 Vue.use(VueAxios, axios)
 
 Vue.use(new VueSocketIO({

@@ -1,51 +1,59 @@
 <template>
     <div>
-        <!-- <audio v-if="streamUrl !== ''" autoplay preload controls>
-            <source :src="streamUrl" type="audio/mpeg">
-        </audio> -->
-        howler player
+        <p v-if="!isPlaying">Awaiting {{ currentUsers - amountOfReadyUsers }} clients to buffer the stream...</p>
+        <audio v-if="streamUrl" ref="audioPlayer" :src="streamUrl" type="audio/mpeg" muted="true" @canplay="userIsReady" controls preload>
+        </audio>
+        <!-- howler player -->
+
+        <!-- <button @click="howler.mute(false);">unmute</button> -->
     </div>
 </template>
 
 <script lang="ts">
     import Vue from 'vue'
     import Component from 'vue-class-component';
-    import { Howl } from 'howler';
+    import { Howl, Howler } from 'howler';
 
     @Component
     export default class Autoplay extends Vue {
         streamUrl = '';
-        sound: Howl | null = null;
+        sound: Howl | null = null;     
+        howler = Howler;
+        isPlaying = false;
+        amountOfReadyUsers = 0;
+        currentUsers = 0;
+        
+        get audioPlayer(): HTMLAudioElement {
+            return this.$refs.audioPlayer as HTMLAudioElement;
+        }
 
         mounted() {
-            const localStorageItem = localStorage.getItem('streamUrl'); 
+            const localStorageItem = localStorage.getItem('streamUrl');
+            this.currentUsers = parseInt(localStorage.getItem('currentUsers') as string); 
             this.streamUrl = localStorageItem ? localStorageItem : '';
-            console.log(this.streamUrl);
-            
-            if (this.streamUrl !== '') {
-                this.sound = new Howl({
-                    src: this.streamUrl,
-                    format: ['mp3'],
-                    // autoplay: true,
-                    loop: true,
-                    volume: 1,
-                    html5: true,
-                    // onload: () => this.sound.play(),
-                    // onloaderror: (e, msg) => window.alert(msg),
-                    // onplayerror: (e, msg) => console.log('onplayerror', e, msg),
-                    // onplay: () => console.log('onplay'),
-                    // onend: () => console.log('onend'),
-                    // onpause: () => console.log('onpause'),
-                    // onrate: () => console.log('onrate'),
-                    // onstop: () => console.log('onstop'),
-                    // onseek: () => console.log('onseek'),
-                    // onfade: () => console.log('onfade'),
-                    // onunlock: () => console.log('onunlock'),
-                });
-                // console.log(this.sound)
-                
-    
-                // sound.play();
+            this.$nextTick(() => {
+                this.audioPlayer.muted = true;
+                this.audioPlayer.load();
+            });
+
+            (this as any).sockets.subscribe('goPlay', () => {   
+                this.isPlaying = true;
+                this.audioPlayer.play();
+            // window.alert('started playback');
+
+            });
+
+            (this as any).sockets.subscribe('readyUsersChange', (data: any) => {   
+                this.amountOfReadyUsers = data;
+            });
+        }
+
+        async userIsReady() {
+            console.log('canplay');
+            try {
+                await (this as any).axios.post(`http://${location.hostname}:3000/readyToPlay`, {});
+            } catch (e) {
+                console.log('something has gone wrong readying up');
             }
         }
     }
